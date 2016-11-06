@@ -137,4 +137,18 @@
       order by date desc
   </select>
   
+  
+   
+   <select id="selectByCount" parameterType="Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from consumedetail
+    where  count= #{count,jdbcType=INTEGER}
+      order by date desc
+  </select>
+  
+  
+  
+  
+  
 </mapper>

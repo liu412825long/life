@@ -18,4 +18,6 @@ public interface ConsumeDetailMapper {
 	int updateByPrimaryKey(ConsumeDetail record);
 
 	List<ConsumeDetail> selectByCondition(ConsumeDetail record);
+
+	List<ConsumeDetail> selectByCount(int count);
 }
