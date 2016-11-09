@@ -1,10 +1,12 @@
 package cn.sh.life.etc.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +27,12 @@ import cn.sh.life.etc.type.ConsumeType;
 import cn.sh.life.etc.util.DateParseUtils;
 import cn.sh.life.etc.util.MessageTemplate;
 import cn.sh.life.etc.vo.AddConsumeDetailVo;
+import cn.sh.life.etc.vo.ConsumeStatistics;
 import cn.sh.life.etc.vo.SharePeopleVo;
 import cn.sh.life.etc.vo.ShowConsumeDetailListVo;
 import cn.sh.life.etc.vo.ShowConsumeDetailVo;
+import cn.sh.life.etc.vo.SingleConsumeVo;
+import cn.sh.life.etc.vo.StatisticsVo;
 
 @Service
 public class ConsumeDetailServiceImpl implements ConsumeDetailService {
@@ -180,6 +185,140 @@ public class ConsumeDetailServiceImpl implements ConsumeDetailService {
 			map.put(account.getId(), account.getRealname());
 		}
 		return map;
+	}
+
+	private Map<Integer, List<ConsumeDetail>> consumeDetailStatistics(int count) {
+		List<ConsumeDetail> listAll = consumeDetailMapper.selectByCount(count);
+		Map<Integer, List<ConsumeDetail>> mapAll = new HashMap<Integer, List<ConsumeDetail>>();
+		if (listAll != null && listAll.size() > 0) {
+			for (ConsumeDetail cd : listAll) {
+				Integer paied = cd.getPaied();
+				if (mapAll.containsKey(paied)) {
+					List<ConsumeDetail> singleList = mapAll.get(paied);
+					singleList.add(cd);
+				} else {
+					List<ConsumeDetail> singleList = new ArrayList<ConsumeDetail>();
+					singleList.add(cd);
+					mapAll.put(paied, singleList);
+				}
+			}
+		}
+		return mapAll;
+	}
+
+	private ConsumeStatistics calculatorThree(ConsumeStatistics cs) {
+		Map<Integer, List<ConsumeDetail>> map = this.consumeDetailStatistics(3);
+		Set<Integer> set = map.keySet();
+		Double sum = new Double(0);
+		Double avg = new Double(0);
+		Map<Integer, Double> payMap = new HashMap<Integer, Double>();
+		for (Integer i : set) {
+			Double payMoney = new Double(0);
+			List<ConsumeDetail> detailList = map.get(i);
+			for (ConsumeDetail con : detailList) {
+				sum = sum + con.getMoney();
+				payMoney = payMoney + con.getMoney();
+			}
+			payMap.put(i, payMoney);
+		}
+		avg = sum / 3;
+		BigDecimal b = new BigDecimal(avg);
+		avg = b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+		sum = cs.getSum() + sum;
+		cs.setSum(sum);
+		List<StatisticsVo> list = cs.getList();
+		for (StatisticsVo vo : list) {
+			Integer payId = vo.getPaied();
+			Double dou = payMap.get(payId);
+			vo.setPayMoney(vo.getPayMoney() + dou);
+			vo.setShareMoney(vo.getShareMoney() + avg);
+			calculatorResultMoney(vo);
+		}
+		return cs;
+	}
+
+	private StatisticsVo calculatorResultMoney(StatisticsVo vo) {
+		Double payMoney = vo.getPayMoney();
+		Double shareMoney = vo.getShareMoney();
+		Double result = payMoney.doubleValue() - shareMoney.doubleValue();
+		if (result.doubleValue() > 0) {
+			vo.setInfo("减少");
+		} else {
+			vo.setInfo("添加");
+		}
+		Double d = Math.abs(result);
+		BigDecimal b = new BigDecimal(d);
+		double f1 = b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+		vo.setResultMoney(f1);
+		System.out.println(vo);
+		return vo;
+	}
+
+	public ConsumeStatistics getConsume() {
+		Map<Integer, List<ConsumeDetail>> map = this.consumeDetailStatistics(2);
+		Set<Integer> set = map.keySet();
+		Map<Integer, Double> mapAvg = new HashMap<Integer, Double>();
+		Map<Integer, StatisticsVo> voMap = new HashMap<Integer, StatisticsVo>();
+		Double sum = new Double(0);
+		for (Integer i : set) {
+			StatisticsVo sv = new StatisticsVo();
+			List<ConsumeDetail> detailList = map.get(i);
+			Double payMoney = new Double(0);
+			for (ConsumeDetail consumeDetail : detailList) {
+				payMoney = payMoney + consumeDetail.getMoney();
+				sum = sum + consumeDetail.getMoney();
+				Integer detailId = consumeDetail.getId();
+				List<Consume> consumeList = consumeService.selectByConsumeDetailId(detailId);
+				for (Consume consume : consumeList) {
+					Integer shareId = consume.getUseraccount();
+					if (mapAvg.containsKey(shareId)) {
+						Double money = consumeDetail.getMoney() / 2 + mapAvg.get(shareId);
+						mapAvg.replace(shareId, money);
+					} else {
+						mapAvg.put(shareId, consumeDetail.getMoney() / 2);
+					}
+				}
+			}
+			sv.setPaied(i);
+			sv.setPayMoney(payMoney);
+			voMap.put(i, sv);
+		}
+		Set<Integer> keySet = mapAvg.keySet();
+		Map<Integer, String> userAccount = this.getUserAccountName();
+		List<StatisticsVo> list = new ArrayList<StatisticsVo>();
+		for (Integer i : keySet) {
+			StatisticsVo statis = voMap.get(i);
+			if (statis != null) {
+				statis.setShareMoney(mapAvg.get(i));
+				statis.setName(userAccount.get(i));
+			}
+			list.add(statis);
+		}
+		ConsumeStatistics cs = new ConsumeStatistics();
+		cs.setSum(sum);
+		cs.setList(list);
+
+		return this.calculatorThree(cs);
+	}
+
+	public SingleConsumeVo getSingleConsumeMoney(Integer userId) {
+		SingleConsumeVo vo = new SingleConsumeVo();
+		vo.setId(userId);
+		ConsumeDetail consumeDetail = new ConsumeDetail();
+		Map<Integer, String> userAccount = this.getUserAccountName();
+		vo.setName(userAccount.get(userId));
+		consumeDetail.setPaied(userId);
+		consumeDetail.setCount(1);
+		List<ConsumeDetail> list = consumeDetailMapper.selectByCondition(consumeDetail);
+		Double sum = new Double(0);
+		if (list != null) {
+			for (ConsumeDetail con : list) {
+				sum = sum + con.getMoney();
+			}
+		}
+		vo.setSingleMoney(sum);
+		return vo;
+
 	}
 
 }

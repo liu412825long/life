@@ -97,4 +97,11 @@
     </trim>
   </select> 
   
+  <select id="selectByConsumeDetailId" parameterType="Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from consume
+    where  consumeDetail=#{consumedetail,jdbcType=INTEGER} 
+  </select> 
+  
 </mapper>

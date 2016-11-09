@@ -56,4 +56,9 @@ public class PageController {
 		return "showMessage";
 	}
 
+	@RequestMapping(value = "/page/showStatistics")
+	public String showStatistics() {
+		return "showStatistics";
+	}
+
 }

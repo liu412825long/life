@@ -16,4 +16,6 @@ public interface ConsumeService {
 
 	public List<Consume> selectByCondition(Consume consume);
 
+	public List<Consume> selectByConsumeDetailId(int id);
+
 }

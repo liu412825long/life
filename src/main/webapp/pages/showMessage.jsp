@@ -7,10 +7,10 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
         <title>我的消息</title>
-        <link rel="stylesheet" href="../css/antui.min.css"/>
+        <link rel="stylesheet" href="<%=path%>/css/antui.min.css"/>
         <!-- <link rel="stylesheet" href="path/to/antui/dist/widget/list.min.css"/> -->
-        <script src="../js/antui.min.js"></script>
-        <script src="../js/jquery.js"></script>
+        <script src="<%=path%>/js/antui.min.js"></script>
+        <script src="<%=path%>/js/jquery.js"></script>
     </head>
     <style>
 html{height: 100%;}
@@ -268,6 +268,9 @@ body{height:100%;overflow-x: hidden;}
 				</a>
 				<a class="am-popmenu-item " href="<%=path%>/page/showMessage">
 					<div class="am-popmenu-content">我的消息<span class="am-bubble two-num" id="messageNum">25</span></div>
+				</a>
+				<a class="am-popmenu-item " href="<%=path%>/page/showStatistics">
+					<div class="am-popmenu-content">统计管理</div>
 				</a>
 				<%-- <a class="am-popmenu-item " href="<%=path%>/page/login">
 					<div class="am-popmenu-content">登录界面</div>

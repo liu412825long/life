@@ -17,8 +17,11 @@ import cn.sh.life.etc.service.MessageService;
 import cn.sh.life.etc.service.UserAccountService;
 import cn.sh.life.etc.util.LoginCookieUtils;
 import cn.sh.life.etc.vo.AddConsumeDetailVo;
+import cn.sh.life.etc.vo.ConsumeStatistics;
 import cn.sh.life.etc.vo.ShowConsumeDetailListVo;
 import cn.sh.life.etc.vo.ShowConsumeDetailVo;
+import cn.sh.life.etc.vo.SingleConsumeVo;
+import cn.sh.life.etc.vo.StatisticsVo;
 
 @RequestMapping(value = "/consumeDetail")
 @Controller
@@ -81,6 +84,34 @@ public class ConsumeDetailController {
 			return Constants.SUCCESS;
 		}
 		return Constants.FAIL;
+	}
+
+	@RequestMapping(value = "/getConsume")
+	@ResponseBody
+	public ConsumeStatistics getConsume() {
+		ConsumeStatistics cs = consumeDetailService.getConsume();
+		return cs;
+	}
+
+	@RequestMapping(value = "/getSingleConsume")
+	@ResponseBody
+	public SingleConsumeVo getSingleConsume(HttpServletRequest request) {
+		Integer id = LoginCookieUtils.getUserAccountIdFromCookie(request);
+		SingleConsumeVo vo = null;
+		if (id != null) {
+			vo = consumeDetailService.getSingleConsumeMoney(id);
+		}
+		ConsumeStatistics cs = consumeDetailService.getConsume();
+		List<StatisticsVo> list = cs.getList();
+		for (StatisticsVo sv : list) {
+			if (sv.getPaied().intValue() == id.intValue()) {
+				vo.setMoney(sv.getPayMoney());
+				vo.setSum(vo.getSingleMoney() + sv.getPayMoney());
+				break;
+			}
+		}
+
+		return vo;
 	}
 
 }

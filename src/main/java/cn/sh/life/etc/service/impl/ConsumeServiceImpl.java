@@ -45,4 +45,10 @@ public class ConsumeServiceImpl implements ConsumeService {
 		return consumeMapper.selectByCondition(consume);
 	}
 
+	@Override
+	public List<Consume> selectByConsumeDetailId(int id) {
+		// TODO Auto-generated method stub
+		return consumeMapper.selectByConsumeDetailId(id);
+	}
+
 }

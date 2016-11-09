@@ -5,8 +5,10 @@ import java.util.List;
 import cn.sh.life.etc.entity.ConsumeDetail;
 import cn.sh.life.etc.entity.UserAccount;
 import cn.sh.life.etc.vo.AddConsumeDetailVo;
+import cn.sh.life.etc.vo.ConsumeStatistics;
 import cn.sh.life.etc.vo.ShowConsumeDetailListVo;
 import cn.sh.life.etc.vo.ShowConsumeDetailVo;
+import cn.sh.life.etc.vo.SingleConsumeVo;
 
 public interface ConsumeDetailService {
 	public int insertConsumeDetail(AddConsumeDetailVo vo);
@@ -22,5 +24,9 @@ public interface ConsumeDetailService {
 	public ShowConsumeDetailVo selectConsumeDetialByCondition(int id);
 
 	public List<ShowConsumeDetailListVo> getConsumeDetialList(ShowConsumeDetailListVo vo);
+
+	public ConsumeStatistics getConsume();
+
+	public SingleConsumeVo getSingleConsumeMoney(Integer userId);
 
 }

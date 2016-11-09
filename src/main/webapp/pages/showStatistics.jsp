@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
-        <title>消费管理</title>
+        <title>消费统计</title>
         <link rel="stylesheet" href="../css/antui.min.css"/>
         <!-- <link rel="stylesheet" href="path/to/antui/dist/widget/list.min.css"/> -->
         <script src="../js/antui.min.js"></script>
@@ -288,26 +288,113 @@ body{height:100%;overflow-x: hidden;}
 			</div>
 		</div>
 	</div>
-<div class="am-list">
-    <div class="am-list-header">消费列表</div>
+	
+	 <div class="demo-content">
+      <div class="am-tab">
+      <a href="#" class="am-tab-item selected" id="all">所有统计</a>
+      <a href="#" class="am-tab-item" id="single">个人统计</a>
+      </div>
+    </div>
+    
+    <div class="am-list info">
     <div class="am-list-body">
-      	<div class="am-list twoline" id="show">
-   
- 	 	</div>
+      <div class="am-list-item oneline">
+        <div class="am-list-content" id="name"></div>
+        <div class="am-list-extra" id="sum"></div>
+      </div>
+       <div class="am-list-item oneline showDetail ">
+        <div class="am-list-content" >非个人消费</div>
+        <div class="am-list-extra" id="twoOrThreeMoney" ></div>
+      </div>
+       <div class="am-list-item oneline showDetail ">
+        <div class="am-list-content" >个人共消费</div>
+        <div class="am-list-extra" id="singleSum" ></div>
+      </div>
+       <!-- <div class="am-list-item oneline">
+        <div class="am-list-content">平均消费钱数</div>
+        <div class="am-list-extra">11652元</div>
+      </div> -->
+      <div class="am-list info" id="content">
+	    <!-- <div class="am-list-item">
+	      <div  class="am-list-item-part">
+	        <div class="am-list-content">刘海龙消费钱数</div>
+	        <div class="am-list-extra">52521元</div>
+	      </div>
+	      <div class="am-list-item-part">
+	      <div class="am-list-content" style='color:red' >平均的钱数</div>
+	        <div class="am-list-extra">300元</div>
+	      </div>
+	       <div class="am-list-item-part">
+	      <div class="am-list-content" style='color:blue' >需要添加</div>
+	        <div class="am-list-extra">300元</div>
+	      </div>
+	      
+	    </div>
+	     <div class="am-list-item">
+	      <div  class="am-list-item-part">
+	        <div class="am-list-content">卢林华消费钱数</div>
+	        <div class="am-list-extra">52521元</div>
+	      </div>
+	      <div class="am-list-item-part">
+	      <div class="am-list-content"><a>需要添加</a></div>
+	        <div class="am-list-extra">300元</div>
+	      </div>
+	    </div>
+	     <div class="am-list-item">
+	      <div  class="am-list-item-part">
+	        <div class="am-list-content">胡胜强消费钱数</div>
+	        <div class="am-list-extra">52521元</div>
+	      </div>
+	      <div class="am-list-item-part">
+	      <div class="am-list-content"><a>需要添加</a></div>
+	        <div class="am-list-extra">300元</div>
+	      </div>
+	    </div> -->
+  </div>
+     
+    </div>
+  </div>
     
     
-   </div>
-</div>
+    <!-- <div class="demo-content">
+  <div class="am-list"  id="content" >
+  </div>
+  
+  </div> -->
   
 	<script type="text/javascript">
 	$(function(){
 		$("#life").click(function(){
 			$("#life-menu").toggle();
 		});
-		getList();
+		getStatistics();
 		getMessageNum();
 		
+		$("#all").click(function(){
+			 $("#content").html("");
+			 $("#all").addClass("selected");
+			 $("#single").removeClass("selected");
+			 getStatistics();
+			 hideSingleDetail();
+		});
+		
+		$("#single").click(function(){
+			showSingleDetail();
+			 $("#content").html("");
+			 $("#all").removeClass("selected");
+			 $("#single").addClass("selected");
+			 getSingleStatistics();
+		});
+		hideSingleDetail();
+		
 	});
+	
+	function showSingleDetail(){
+		$(".showDetail").show();
+	}
+	function hideSingleDetail(){
+		$(".showDetail").hide();
+	}
 	
 	function getMessageNum(){
 		$.post("<%=path%>/message/getMessage",{
@@ -326,37 +413,42 @@ body{height:100%;overflow-x: hidden;}
 		});
 	}
 	
-	function getList(){
-		$.post("<%=path%>/consumeDetail/queryAllConsumeDetail",{
-			
-		},function(data){
-			//alert(data.length);
+	function getStatistics(){
+		$.post("<%=path%>/consumeDetail/getConsume",
+				function(data){
 			if(data!=null){
-				for(var i=0;i<data.length;i++){
-					var detail=data[i];
-					var pic="";
-					if(detail.paied==15){
-						pic="liu.jpg";
-					}else if(detail.paied==16){
-						pic="lu.jpg";
-					}else{
-						pic="hu.jpg";
+				$("#name").html("总消费钱数");
+				$("#sum").html(data.sum+"元");
+				if(data.list!=null){
+					var list=data.list;
+					for(var i=0;i<list.length;i++){
+						var statis=list[i];
+						createDiv(statis.name,statis.payMoney,statis.shareMoney,statis.info,statis.resultMoney);
 					}
-					var href="<%=path%>/page/showConsumeDetail?id="+detail.id;
-					createDiv(href,pic,detail.payName,detail.count,detail.showDate,detail.money);
 				}
 			}
 		});
 	}
 	
-	function createDiv(href,pic,name,shareCount,dateTime,money){
-		//../img/people.jpg
-		var createA="<a href='"+href+"' class='am-list-item'><div class='am-list-thumb'>"+
-		"<img src='../img/"+pic+"' alt=''></div><div class='am-list-content'><div class='am-list-title twocolumn'>"+
-		"<label>"+name+"</label><div class='am-list-right-brief'>人数: "+shareCount+"</div></div><div class='am-list-brief twocolumn'>"+
-		"<label>"+dateTime+"</label><div class='am-list-right-brief'>"+money+"元</div></div></div><div class='am-list-arrow'>"+
-		"<span class='am-icon arrow horizontal'></span></div></a>";
-		$("#show").append(createA);
+	function createDiv(name,payMoney,shareMoney,info,resultMoney){
+		var div="<div class='am-list-item'><div  class='am-list-item-part'><div class='am-list-content'>"+name+"消费钱数</div>"+
+		"<div class='am-list-extra'>"+payMoney+"元</div></div><div class='am-list-item-part'>"+"<div class='am-list-content' style='color:blue' >平均的钱数</div>"+
+		"<div class='am-list-extra'>"+shareMoney+"元</div></div><div class='am-list-item-part'><div class='am-list-content' style='color:red' >需要"+info+"</div>"+
+		"<div class='am-list-extra'>"+resultMoney+"元</div></div></div>";
+		$("#content").append(div);
+	}
+	
+	function getSingleStatistics(){
+		$.post("<%=path%>/consumeDetail/getSingleConsume",
+				function(data){
+			if(data!=null){
+				$("#name").html(data.name+"个人消费钱数");
+				$("#sum").html(data.singleMoney+"元");
+				$("#twoOrThreeMoney").html(data.money+"元");
+				$("#singleSum").html(data.sum+"元");
+				
+			}
+		});
 	}
 	
 	
