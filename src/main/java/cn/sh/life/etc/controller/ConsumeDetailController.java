@@ -19,6 +19,7 @@ import cn.sh.life.etc.util.LoginCookieUtils;
 import cn.sh.life.etc.vo.AddConsumeDetailVo;
 import cn.sh.life.etc.vo.ConsumeStatistics;
 import cn.sh.life.etc.vo.ShowConsumeDetailListVo;
+import cn.sh.life.etc.vo.ShowConsumeDetailListVoPage;
 import cn.sh.life.etc.vo.ShowConsumeDetailVo;
 import cn.sh.life.etc.vo.SingleConsumeVo;
 import cn.sh.life.etc.vo.StatisticsVo;
@@ -67,9 +68,9 @@ public class ConsumeDetailController {
 
 	@RequestMapping(value = "/queryAllConsumeDetail")
 	@ResponseBody
-	public List<ShowConsumeDetailListVo> getAllConsumeDetail(ShowConsumeDetailListVo vo) {
-		List<ShowConsumeDetailListVo> list = consumeDetailService.getConsumeDetialList(vo);
-		return list;
+	public ShowConsumeDetailListVoPage getAllConsumeDetail(ShowConsumeDetailListVo vo) {
+		ShowConsumeDetailListVoPage page = consumeDetailService.getConsumeDetialList(vo);
+		return page;
 	}
 
 	@RequestMapping(value = "/addConsumeDetail")

@@ -1,6 +1,5 @@
 package cn.sh.life.etc.service.impl;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,6 +10,9 @@ import java.util.Set;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 
 import cn.sh.life.etc.convert.ConsumeDetailConvert;
 import cn.sh.life.etc.dao.ConsumeDetailMapper;
@@ -26,10 +28,12 @@ import cn.sh.life.etc.type.ConsumeStatus;
 import cn.sh.life.etc.type.ConsumeType;
 import cn.sh.life.etc.util.DateParseUtils;
 import cn.sh.life.etc.util.MessageTemplate;
+import cn.sh.life.etc.util.NumberUtils;
 import cn.sh.life.etc.vo.AddConsumeDetailVo;
 import cn.sh.life.etc.vo.ConsumeStatistics;
 import cn.sh.life.etc.vo.SharePeopleVo;
 import cn.sh.life.etc.vo.ShowConsumeDetailListVo;
+import cn.sh.life.etc.vo.ShowConsumeDetailListVoPage;
 import cn.sh.life.etc.vo.ShowConsumeDetailVo;
 import cn.sh.life.etc.vo.SingleConsumeVo;
 import cn.sh.life.etc.vo.StatisticsVo;
@@ -161,21 +165,36 @@ public class ConsumeDetailServiceImpl implements ConsumeDetailService {
 	}
 
 	@Override
-	public List<ShowConsumeDetailListVo> getConsumeDetialList(ShowConsumeDetailListVo vo) {
+	public ShowConsumeDetailListVoPage getConsumeDetialList(ShowConsumeDetailListVo vo) {
 		// TODO Auto-generated method stub
 		List<ShowConsumeDetailListVo> lists = new ArrayList<ShowConsumeDetailListVo>();
 		ConsumeDetail record = ConsumeDetailConvert.convertToConsumeDetail(vo);
+		PageHelper.startPage(vo.getCurrentPage(), 5);
 		List<ConsumeDetail> list = consumeDetailMapper.selectByCondition(record);
+		PageInfo<ConsumeDetail> page = new PageInfo<ConsumeDetail>(list);
+		/*
+		 * System.out.println("getResult:" + page.getList() + "getPageNum" +
+		 * page.getPageNum() + "getPages" + page.getPages() + "getTotal" +
+		 * page.getTotal() + "page" + page); System.out.println(list.size() +
+		 * "....");
+		 */
 		Map<Integer, String> map = this.getUserAccountName();
-		for (ConsumeDetail detail : list) {
-			ShowConsumeDetailListVo showVo = new ShowConsumeDetailListVo();
-			BeanUtils.copyProperties(detail, showVo);
-			showVo.setPayName(map.get(detail.getPaied()));
-			showVo.setStatus(ConsumeStatus.getEnumById(detail.getStatue().byteValue()).getName());
-			showVo.setShowDate(DateParseUtils.parseToStringDate(detail.getDate()));
-			lists.add(showVo);
+		if (list != null) {
+			for (ConsumeDetail detail : list) {
+				ShowConsumeDetailListVo showVo = new ShowConsumeDetailListVo();
+				BeanUtils.copyProperties(detail, showVo);
+				showVo.setPayName(map.get(detail.getPaied()));
+				showVo.setStatus(ConsumeStatus.getEnumById(detail.getStatue().byteValue()).getName());
+				showVo.setShowDate(DateParseUtils.parseToStringDate(detail.getDate()));
+				lists.add(showVo);
+			}
 		}
-		return lists;
+		ShowConsumeDetailListVoPage pageVo = new ShowConsumeDetailListVoPage();
+		pageVo.setCurrentPage(page.getPageNum());
+		pageVo.setList(lists);
+		pageVo.setTotalPage(page.getPages());
+		pageVo.setHasNext(page.isHasNextPage());
+		return pageVo;
 	}
 
 	private Map<Integer, String> getUserAccountName() {
@@ -222,17 +241,21 @@ public class ConsumeDetailServiceImpl implements ConsumeDetailService {
 			payMap.put(i, payMoney);
 		}
 		avg = sum / 3;
-		BigDecimal b = new BigDecimal(avg);
-		avg = b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+		avg = NumberUtils.numberFormat(avg);
 		sum = cs.getSum() + sum;
 		cs.setSum(sum);
 		List<StatisticsVo> list = cs.getList();
-		for (StatisticsVo vo : list) {
-			Integer payId = vo.getPaied();
-			Double dou = payMap.get(payId);
-			vo.setPayMoney(vo.getPayMoney() + dou);
-			vo.setShareMoney(vo.getShareMoney() + avg);
-			calculatorResultMoney(vo);
+		if (list != null) {
+			for (StatisticsVo vo : list) {
+				Integer payId = vo.getPaied();
+				Double dou = payMap.get(payId);
+				if (dou == null) {
+					dou = new Double(0);
+				}
+				vo.setPayMoney(vo.getPayMoney() + dou);
+				vo.setShareMoney(vo.getShareMoney() + avg);
+				calculatorResultMoney(vo);
+			}
 		}
 		return cs;
 	}
@@ -247,9 +270,8 @@ public class ConsumeDetailServiceImpl implements ConsumeDetailService {
 			vo.setInfo("添加");
 		}
 		Double d = Math.abs(result);
-		BigDecimal b = new BigDecimal(d);
-		double f1 = b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
-		vo.setResultMoney(f1);
+		vo.setResultMoney(NumberUtils.numberFormat(d));
+		vo.setShareMoney(NumberUtils.numberFormat(vo.getShareMoney()));
 		System.out.println(vo);
 		return vo;
 	}
@@ -291,8 +313,8 @@ public class ConsumeDetailServiceImpl implements ConsumeDetailService {
 			if (statis != null) {
 				statis.setShareMoney(mapAvg.get(i));
 				statis.setName(userAccount.get(i));
+				list.add(statis);
 			}
-			list.add(statis);
 		}
 		ConsumeStatistics cs = new ConsumeStatistics();
 		cs.setSum(sum);

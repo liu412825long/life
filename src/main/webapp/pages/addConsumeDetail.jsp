@@ -267,7 +267,7 @@ body{height:100%;overflow-x: hidden;}
 				<a class="am-popmenu-item" href="<%=path %>/page/addConsumeDetail">
 					<div class="am-popmenu-content">添加账单</div>
 				</a>
-				<a class="am-popmenu-item" href="<%=path%>/page/index">
+				<a class="am-popmenu-item" href="<%=path%>/page/main">
 					<div class="am-popmenu-content">查看账单</div>
 				</a>
 				<a class="am-popmenu-item " href="<%=path%>/page/showMessage">
@@ -296,7 +296,7 @@ body{height:100%;overflow-x: hidden;}
         <div class="am-list-content">
           <select id="type">
             <option value="1">餐饮费</option>
-            <option value="2">水电费</option>
+            <option value="2">水电费</option> 
           </select>
         </div>
         <div class="am-list-arrow"><span class="am-icon arrow vertical"></span></div>
@@ -423,7 +423,7 @@ body{height:100%;overflow-x: hidden;}
 	
 	function check(){
 		var date=$("#date").val();
-		var money=$("#money").val();
+		var money=$.trim($("#money").val());
 		var desc=$("#desc").val();
 		if(date==""){
 			alert("请输入消费日期");
@@ -432,6 +432,15 @@ body{height:100%;overflow-x: hidden;}
 		if(money==""){
 			alert("请输入消费钱数");
 			return false;
+		}else{
+			var rege=new RegExp("^[0-9]+(.[0-9]{2})?$");
+			if(!rege.test(money)){
+				alert("请输入正确的金额");
+				return false;
+			}else if(parseFloat(money)>10000){
+				alert("金额不能超过10000");
+				return false;
+			}
 		}
 		if(desc==""){
 			alert("请输入消费描述");
@@ -454,6 +463,11 @@ body{height:100%;overflow-x: hidden;}
 		var div="<div class='am-checkbox mini argument'><input id='"+id+"' type='checkbox' >"
 		+"<span class='icon-check'></span><label for='"+id+"'>"+name+"</label><a  href='' target='_blank'></a></div>";
 		$("#share").append(div);
+	}
+	
+	function checkMoney(){
+		
+		return true;
 	}
 	</script>
 

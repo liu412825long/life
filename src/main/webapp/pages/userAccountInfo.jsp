@@ -265,7 +265,7 @@ body{height:100%;overflow-x: hidden;}
 				<a class="am-popmenu-item" href="<%=path %>/page/addConsumeDetail">
 					<div class="am-popmenu-content">添加账单</div>
 				</a>
-				<a class="am-popmenu-item" href="<%=path%>/page/index">
+				<a class="am-popmenu-item" href="<%=path%>/page/main">
 					<div class="am-popmenu-content">查看账单</div>
 				</a>
 				<a class="am-popmenu-item " href="<%=path%>/page/showMessage">
@@ -293,31 +293,31 @@ body{height:100%;overflow-x: hidden;}
     <div class="am-list-item am-input-autoclear">
       <div class="am-list-label">用户名</div>
       <div class="am-list-control">
-        <input type="text" placeholder="用户名" id="username" value="">
+        <input type="text" placeholder="用户名" id="username" disabled="disabled" value="">
       </div>
     </div>
     <div class="am-list-item am-input-autoclear">
       <div class="am-list-label">用户昵称 </div>
       <div class="am-list-control">
-        <input type="text" placeholder="用户昵称 "   id="virtualName" value="">
+        <input type="text" placeholder="用户昵称 "  disabled="disabled"  id="virtualName" value="">
       </div>
     </div>
     <div class="am-list-item am-input-autoclear">
       <div class="am-list-label">真实姓名</div>
       <div class="am-list-control">
-        <input type="text" placeholder="真实姓名"   id="realName"  value="">
+        <input type="text" placeholder="真实姓名" disabled="disabled"  id="realName"  value="">
       </div>
     </div>
     <div class="am-list-item am-input-autoclear">
       <div class="am-list-label">手机号码</div>
       <div class="am-list-control">
-        <input type="text" placeholder="手机号码"    id="phone"  value="">
+        <input type="text" placeholder="手机号码"  disabled="disabled"  id="phone"  value="">
       </div>
     </div>
     <div class="am-list-item am-input-autoclear">
       <div class="am-list-label">电子邮箱</div>
       <div class="am-list-control">
-        <input type="text" placeholder="电子邮箱"  id="email" >
+        <input type="text" placeholder="电子邮箱" disabled="disabled" id="email" >
       </div>
     </div>
     
@@ -376,7 +376,12 @@ body{height:100%;overflow-x: hidden;}
 	 });
 	 init();
 	 $("#update").click(function(){
-			  if(check()){
+		 var dis=$("#username").attr("disabled");
+		 if(dis=="disabled"){
+			 removeDisable();
+			 $(this).html("确认修改");
+		 }else{
+			   if(check()){
 				 $.post("<%=path%>/modifyAccountDetail",{
 					 username:$.trim($("#username").val()),
 					 virtualname:$.trim($("#virtualName").val()),
@@ -394,6 +399,7 @@ body{height:100%;overflow-x: hidden;}
 					 }
 				 });
 			 } 
+			  }
 	 });
 		
 	 
@@ -432,7 +438,7 @@ body{height:100%;overflow-x: hidden;}
  
  function removeDisable(){
 	 $(":text").each(function(){
-		 $(this).removeAttr("disabled")
+		 $(this).removeAttr("disabled");
 	 });
  }
  

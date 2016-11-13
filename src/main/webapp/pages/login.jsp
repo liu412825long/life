@@ -67,7 +67,7 @@
     				password:$.trim($("#password").val())
     			},function(data){
     				if(data=="success"){
-    					location.href="<%=path%>/page/index";
+    					location.href="<%=path%>/page/main";
     				}else{
     					 $("#errorInfo").html("用户名或者密码错误");
     		    		 showErrorInfo();

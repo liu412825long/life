@@ -32,6 +32,9 @@ public class LoginCookieUtils {
 	public static Integer getUserAccountIdFromCookie(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
 		String value = null;
+		if (cookies == null) {
+			return null;
+		}
 		for (Cookie cookie : cookies) {
 			String name = cookie.getName();
 			if (name.equals("userId")) {

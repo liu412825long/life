@@ -263,7 +263,7 @@ body{height:100%;overflow-x: hidden;}
 				<a class="am-popmenu-item" href="<%=path %>/page/addConsumeDetail">
 					<div class="am-popmenu-content">添加账单</div>
 				</a>
-				<a class="am-popmenu-item" href="<%=path%>/page/index">
+				<a class="am-popmenu-item" href="<%=path%>/page/main">
 					<div class="am-popmenu-content">查看账单</div>
 				</a>
 				<a class="am-popmenu-item " href="<%=path%>/page/showMessage">
@@ -298,16 +298,41 @@ body{height:100%;overflow-x: hidden;}
     
    </div>
 </div>
+<input type="hidden" id="currentPage" value="1" />
+<input type="hidden" id="totalPage" value="1" />
+ <button type="button" class="am-button blue" id="next">下一页</button>
   
 	<script type="text/javascript">
 	$(function(){
 		$("#life").click(function(){
 			$("#life-menu").toggle();
 		});
-		getList();
+		getList(1);
 		getMessageNum();
+		$("#next").click(function(){
+			var currentPage=parseInt($("#currentPage").val());
+			getList(currentPage);
+		});
 		
 	});
+	
+	function showButton(){
+		var currentPage=parseInt($("#currentPage").val());
+		var totalPage=parseInt($("#totalPage").val());
+		//alert(currentPage+"..."+totalPage);
+		if(currentPage!=null&&totalPage!=null){
+			if(currentPage<totalPage){
+				currentPage=currentPage+1;
+				$("#currentPage").val(currentPage);
+				$("#next").html("下一页");
+				$("#next").removeAttr("disabled");
+			}else if(currentPage==totalPage){
+				$("#currentPage").val(totalPage);
+				$("#next").html("没有数据了");
+				$("#next").attr("disabled","disabled");
+			}
+		}
+	}
 	
 	function getMessageNum(){
 		$.post("<%=path%>/message/getMessage",{
@@ -326,14 +351,16 @@ body{height:100%;overflow-x: hidden;}
 		});
 	}
 	
-	function getList(){
+	function getList(current){
+		//var current=$("#currentPage").val();
 		$.post("<%=path%>/consumeDetail/queryAllConsumeDetail",{
-			
+			currentPage:current
 		},function(data){
 			//alert(data.length);
 			if(data!=null){
-				for(var i=0;i<data.length;i++){
-					var detail=data[i];
+				var list=data.list;
+				for(var i=0;i<list.length;i++){
+					var detail=list[i];
 					var pic="";
 					if(detail.paied==15){
 						pic="liu.jpg";
@@ -344,6 +371,9 @@ body{height:100%;overflow-x: hidden;}
 					}
 					var href="<%=path%>/page/showConsumeDetail?id="+detail.id;
 					createDiv(href,pic,detail.payName,detail.count,detail.showDate,detail.money);
+				$("#currentPage").val(data.currentPage);
+				$("#totalPage").val(data.totalPage);
+					showButton();
 				}
 			}
 		});
