@@ -26,7 +26,7 @@ public class PageController {
 		return "error";
 	}
 
-	@RequestMapping(value = "/page/addConsumeDetail")
+	@RequestMapping(value = "/page/addConsumeDetailPage")
 	public String addConsumeDetail() {
 		return "addConsumeDetail";
 	}

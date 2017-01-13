@@ -260,7 +260,7 @@ body{height:100%;overflow-x: hidden;}
 		<div class="demo-content">
 			<!-- <div class="am-popmenu-mask show"></div> -->
 			<div class="am-popmenu" id="life-menu" style="display:none">
-				<a class="am-popmenu-item" href="<%=path %>/page/addConsumeDetail">
+				<a class="am-popmenu-item" href="<%=path %>/page/addConsumeDetailPage">
 					<div class="am-popmenu-content">添加账单</div>
 				</a>
 				<a class="am-popmenu-item" href="<%=path%>/page/main">
